@@ -2,6 +2,7 @@
 
 require "store_model/model"
 require "store_model/configuration"
+require "store_model/active_admin_compatibility"
 require "store_model/railtie" if defined?(::Rails::Railtie)
 require "active_model/validations/store_model_validator"
 
