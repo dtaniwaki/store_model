@@ -14,18 +14,13 @@ module StoreModel
     # This provides compatibility with form builders like ActiveAdmin's has_many
     # that expect ActiveRecord-style reflection objects.
     class Reflection
-      attr_reader :klass, :name
+      attr_reader :name, :klass
 
       # @param name [Symbol] association name
       # @param klass [Class] the StoreModel class
       def initialize(name, klass)
         @name = name
         @klass = klass
-      end
-
-      # @return [Boolean] always true for array types
-      def collection?
-        true
       end
     end
   end
@@ -54,7 +49,16 @@ StoreModel::NestedAttributes::ClassMethods.module_eval do
   def reflect_on_association(name)
     return super unless StoreModel.config.active_admin_compatibility
 
-    store_model_reflections[name.to_sym] || super
+    reflection = store_model_reflections[name.to_sym]
+    return reflection if reflection
+
+    # Try to call super if it's defined (for ActiveRecord models)
+    # For pure StoreModel classes (like Supplier), there's no super method
+    begin
+      super
+    rescue StandardError
+      nil
+    end
   end
 
   # Returns hash of registered StoreModel reflections.
